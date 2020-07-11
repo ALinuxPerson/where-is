@@ -68,10 +68,10 @@ Write the following information to:
 ... or `$DATABASE_FOLDER`
 
 # Built with
-- Rich: For rich text and beautiful formatting
-- Fire: Used for generating CLIs
-- Black: Used as the formatter
-- Pipenv: Used as the virtualenv manager
+- [Rich](https://github.com/willmcgugan/rich): For rich text and beautiful formatting
+- [Fire](https://github.com/google/python-fire): Used for generating CLIs
+- [Black](https://github.com/psf/black): Used as the formatter
+- [Pipenv](https://github.com/pypa/pipenv): Used as the virtualenv manager
 
 # License
-This project is licensed under the GNU GPLv3 License - see this LICENSE.md file for details
+This project is licensed under the GNU GPLv3 License - see this [LICENSE.md](https://raw.githubusercontent.com/what-to-code-complete/where-is/master/LICENSE) file for details
