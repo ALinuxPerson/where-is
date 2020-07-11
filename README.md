@@ -38,7 +38,7 @@ Where:
 {
   "name": "$NAME",
   "locations": [
-    [$LOCATIONS ...]  
+    ["$LOCATIONS", "..."]  
   ] 
 }
 ```
