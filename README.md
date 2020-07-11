@@ -2,8 +2,8 @@
 
 # where-is
 <p float="left">
-  <img src="other/demonstration.gif">
-  <img src="other/configuration.gif">
+  <img src="other/demonstration.gif" width="330" height="255">
+  <img src="other/configuration.gif" width="330" height="255">
 </p>
                                     
 > An elegant way of getting configuration files (and folders)
