@@ -1,7 +1,11 @@
-<img src="other/logo.png" align="right"/>
+<img src="other/logo.png" align="right" width="200" height="178" alt="Logo"/>
 
 # where-is
-![Demonstration](other/demonstration.gif) ![Configuration](other/configuration.gif)
+<p float="left">
+  <img src="other/demonstration.gif">
+  <img src="other/configuration.gif">
+</p>
+                                    
 > An elegant way of getting configuration files (and folders)
 
 
