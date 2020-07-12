@@ -18,6 +18,9 @@ def find(
 ) -> None:
     """Find an entry with the name NAME"""
 
+    def log(message: str) -> None:
+        return levels.debug(message) if verbose else None
+
 
 @app.command()
 def entry(
@@ -33,6 +36,9 @@ def entry(
     ),
 ) -> None:
     """Query, add and remove the entry with the name NAME."""
+
+    def log(message: str) -> None:
+        return levels.debug(message) if verbose else None
 
 
 def main() -> None:
