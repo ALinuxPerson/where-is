@@ -12,12 +12,12 @@ def find(
         utils.config_folder(), help="The location of the database."
     ),
 ) -> None:
-    """Find an entry."""
+    """Find an entry with the name NAME"""
 
 
 @app.command()
 def entry(
-    name: str = typer.Option(..., help="The name of the entry."),
+    name: str,
     database_location: Path = typer.Argument(
         utils.config_folder(), help="The location of the database."
     ),
@@ -25,7 +25,7 @@ def entry(
     add: bool = typer.Argument(False, help="Add the entry to the database."),
     remove: bool = typer.Argument(False, help="Remove the entry from the database."),
 ) -> None:
-    """Query, add and remove entries."""
+    """Query, add and remove the entry with the name NAME."""
 
 
 def main() -> None:
