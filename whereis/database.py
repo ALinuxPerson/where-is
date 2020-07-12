@@ -49,7 +49,9 @@ class Entry:
         Notes:
             The paths can be formatted.
             Here is the following format map:
-                {HOME}: <your home folder>
+                {HOME}: Your home folder.
+                {WHEREIS_CONFIG}: The where-is configuration folder.
+                {CONFIG_FOLDER}: The configuration folder.
 
         Returns:
             All of the locations an entry has.
@@ -93,36 +95,12 @@ class Entry:
         format_map: Dict[str, str] = {
             "HOME": str(Path().home()),
             "WHEREIS_CONFIG": str(utils.config_folder()),
-            "CONFIG_FOLDER": str(utils.config_folder() / ".."),
+            "CONFIG_FOLDER": str(utils.config_folder().parent),
         }
         try:
             return path.format(**format_map)
         except (KeyError, IndexError, ValueError):
             raise KeyError(f"Format map not supported for path '{path}'.") from None
-
-    def add(self) -> None:
-        """Adds the entry object to the database.
-
-        Returns:
-            Nothing.
-        """
-        return self.database.add(self)
-
-    def remove(self) -> None:
-        """Removes the entry object from the database.
-
-        Returns:
-            Nothing.
-        """
-        return self.database.remove(self)
-
-    def exists(self) -> bool:
-        """Checks if the entry object exists in the database.
-
-        Returns:
-            True if the entry object exists, else False.
-        """
-        return self in self.database.entries
 
     def locations_exists(self) -> Dict[Path, bool]:
         """Does each location exist?
