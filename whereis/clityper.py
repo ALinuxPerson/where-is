@@ -1,9 +1,49 @@
 import typer
 from pathlib import Path
-from whereis import utils
-from whereis import levels
+from whereis import utils, levels, Database, Entry
+from typing import Optional, List
+import os
+from rich.table import Table
+from rich import print
 
-app: typer.Typer = typer.Typer()
+app: typer.Typer = typer.Typer(
+    help="An elegant way to find configuration files (and folders)."
+)
+
+
+def _log(message: str) -> None:
+    try:
+        return (
+            levels.debug(message) if bool(int(os.getenv("WIS_VERBOSE", "0"))) else None
+        )
+    except (ValueError, TypeError):
+        levels.error(f"WIS_VERBOSE isn't a valid boolean.")
+
+
+def _get_entry(entry_name: str, database: Database) -> Optional[Entry]:
+    for entry_ in database.entries:
+        _log(f"Checking if [bold]'{entry_.name}'[/] == [bold]'{entry_name}'[/]...")
+        if entry_.name == entry_name:
+            _log(f"Got entry, {entry_}")
+            return entry_
+    else:
+        levels.error(f"Couldn't find entry '{entry_name}' in the database.")
+        return None
+
+
+def _gen_entry_table(entry_: Entry) -> Table:
+    columns: List[str] = ["Locations", "Exists", "Is File", "Is Folder"]
+    table: Table = Table(title="[bold purple]Config files found")
+    for column in columns:
+        table.add_column(column)
+    for location, exists in entry_.locations_exists().items():
+        formatted_location: str = f"[magenta]{location}"
+        formatted_exists: str = f"[red]{exists}" if not exists else f"[green4]{exists}"
+        is_file: str = f"[blue]{location.is_file()}" if exists else "[blue italic]Unknown"
+        is_dir: str = f"[blue]{location.is_dir()}" if exists else "[blue italic]Unknown"
+        table.add_row(formatted_location, formatted_exists, is_file, is_dir)
+
+    return table
 
 
 @app.command()
@@ -12,14 +52,18 @@ def find(
     database_location: Path = typer.Option(
         utils.config_folder(), help="The location of the database."
     ),
-    verbose: bool = typer.Option(
-        False, help="Enable verbose output.", envvar="WIS_VERBOSE"
-    ),
 ) -> None:
     """Find an entry with the name NAME"""
-
-    def log(message: str) -> None:
-        return levels.debug(message) if verbose else None
+    database: Database = Database(database_location)
+    _log(f"Got database, {database}")
+    entry_: Optional[Entry] = _get_entry(name, database)
+    if not database.exists():
+        levels.info("Database doesn't exist, creating...")
+        database.create()
+    if not entry_:
+        return
+    table: Table = _gen_entry_table(entry_)
+    return print(table)
 
 
 @app.command()
@@ -31,14 +75,8 @@ def entry(
     info: bool = typer.Option(True, help="Show information about the entry."),
     add: bool = typer.Option(False, help="Add the entry to the database."),
     remove: bool = typer.Option(False, help="Remove the entry from the database."),
-    verbose: bool = typer.Option(
-        False, help="Enable verbose output.", envvar="WIS_VERBOSE"
-    ),
 ) -> None:
     """Query, add and remove the entry with the name NAME."""
-
-    def log(message: str) -> None:
-        return levels.debug(message) if verbose else None
 
 
 def main() -> None:
