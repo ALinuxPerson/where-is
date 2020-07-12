@@ -50,7 +50,7 @@ def root(verbose: bool = typer.Option(False, help="Enable verbose output.")) -> 
     global is_verbose
 
     if verbose:
-        is_verbose = False
+        is_verbose = True
 
 
 @app.command()
