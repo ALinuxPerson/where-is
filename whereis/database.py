@@ -31,7 +31,6 @@ class Entry:
         """
         self._name = name
         self._locations = locations
-        self.database: Database = Database()
 
     @property
     def name(self) -> str:
