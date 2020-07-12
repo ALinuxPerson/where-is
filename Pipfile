@@ -11,6 +11,7 @@ rich = "==3.1.0"
 jsonschema = "*"
 fire = "*"
 mypy = "==0.782"
+text-editor = "*"
 
 [requires]
 python_version = "3.8"

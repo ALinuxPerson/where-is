@@ -13,10 +13,29 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from whereis.cli import main as cli_main
+from typing import List
+import sys
+
+
+def process_imports(package_name: str) -> bool:
+    try:
+        __import__(package_name)
+        return True
+    except ImportError:
+        print(
+            f" [✗] The package {package_name} isn't installed on your system.",
+            file=sys.stderr,
+        )
+        return False
 
 
 def main() -> None:
+    to_import: List[str] = ["rich", "fire", "texteditor"]
+    if False in (process_imports(package_name) for package_name in to_import):
+        sys.exit(2)
+
+    from whereis.cli import main as cli_main
+
     return cli_main()
 
 
