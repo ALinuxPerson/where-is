@@ -38,6 +38,17 @@ def excepthook(
             word_wrap=False,
         )
     )
+    levels.error(
+        f"Please report this exception here: [blue underline]https://github.com/what-to-code-complete/where-is/issues"
+    )
+    levels.info(
+        "[bold]Post-mortem information[/]\n"
+        "[underline]How to report this exception:[/]\n"
+        "[italic]1. Capture stdout and stderr to file:\n"
+        "\t$ <YOUR_ERRORED_CMD> >> error.log 2>&1\n"
+        "[italic]2. Upload 'error.log' as a gist [bold](note: only gists are allowed.)[/]\n"
+        "[italic]3. Attach it to your issue [bold](give your issue a descriptive title and description!)[/]"
+    )
 
 
 sys.excepthook = excepthook
