@@ -43,11 +43,11 @@ def main() -> None:
     Returns:
         Nothing.
     """
-    to_import: List[str] = ["rich", "fire", "texteditor"]
+    to_import: List[str] = ["rich", "typer"]
     if False in (process_imports(package_name) for package_name in to_import):
         sys.exit(2)
 
-    from whereis.cli import main as cli_main
+    from whereis.clityper import main as cli_main
 
     return cli_main()
 

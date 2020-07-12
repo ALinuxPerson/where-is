@@ -12,6 +12,8 @@ jsonschema = "*"
 fire = "*"
 mypy = "==0.782"
 text-editor = "*"
+typer = "*"
+shellingham = "*"
 
 [requires]
 python_version = "3.8"
