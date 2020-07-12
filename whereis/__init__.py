@@ -14,3 +14,30 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from whereis.database import *
+from whereis import levels
+from rich.traceback import Traceback, TracebackType
+from rich.console import Console
+from typing import Type
+import sys
+
+
+def excepthook(
+    type_: Type[BaseException], value: BaseException, traceback: TracebackType,
+) -> None:
+    levels.error(f"[bold]Exception[/] occurred, please wait for it to be processed...")
+    traceback_console: Console = Console(file=sys.stderr)
+
+    traceback_console.print(
+        Traceback.from_exception(
+            type_,
+            value,
+            traceback,
+            width=100,
+            extra_lines=3,
+            theme=None,
+            word_wrap=False,
+        )
+    )
+
+
+sys.excepthook = excepthook
