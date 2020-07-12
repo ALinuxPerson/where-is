@@ -18,6 +18,14 @@ import sys
 
 
 def process_imports(package_name: str) -> bool:
+    """Processes imports to determine if they're installed or not.
+
+    Args:
+        package_name: The package name.
+
+    Returns:
+        True if the package is installed, else False.
+    """
     try:
         __import__(package_name)
         return True
@@ -30,6 +38,11 @@ def process_imports(package_name: str) -> bool:
 
 
 def main() -> None:
+    """Main entry point.
+
+    Returns:
+        Nothing.
+    """
     to_import: List[str] = ["rich", "fire", "texteditor"]
     if False in (process_imports(package_name) for package_name in to_import):
         sys.exit(2)
