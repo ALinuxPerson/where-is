@@ -239,5 +239,11 @@ class Database:
         for path in sample_db.iterdir():
             shutil.copyfile(str(path), str(self.location / path.name))
 
+    def __add__(self, other: Entry) -> None:
+        return self.add(other)
+
+    def __sub__(self, other: Entry) -> None:
+        return self.remove(other)
+
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} object: location={self.location}>"
