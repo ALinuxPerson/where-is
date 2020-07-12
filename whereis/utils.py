@@ -17,6 +17,8 @@ from pathlib import Path
 import platform
 from typing import Dict
 import os
+import random
+import string
 
 
 def config_folder(system: str = platform.system()) -> Path:
@@ -39,3 +41,15 @@ def config_folder(system: str = platform.system()) -> Path:
     }
 
     return switch_case.get(system, switch_case["Linux"])
+
+
+def generate_string(num_range: int = 8) -> str:
+    """Generates a random string.
+
+    Args:
+        num_range: The range to generate characters.
+
+    Returns:
+        A random string.
+    """
+    return "".join(random.choice(string.ascii_letters) for _ in range(num_range))
