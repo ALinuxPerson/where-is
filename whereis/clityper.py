@@ -9,13 +9,12 @@ from rich import print
 app: typer.Typer = typer.Typer(
     help="An elegant way to find configuration files (and folders)."
 )
+is_verbose: bool = False
 
 
 def _log(message: str) -> None:
     try:
-        return (
-            levels.debug(message) if bool(int(os.getenv("WIS_VERBOSE", "0"))) else None
-        )
+        return levels.debug(message) if is_verbose else None
     except (ValueError, TypeError):
         levels.error(f"WIS_VERBOSE isn't a valid boolean.")
 
@@ -44,6 +43,14 @@ def _gen_entry_table(entry_: Entry) -> Table:
         table.add_row(formatted_location, formatted_exists, is_file, is_dir)
 
     return table
+
+
+@app.callback()
+def root(verbose: bool = typer.Option(False, help="Enable verbose output.")) -> None:
+    global is_verbose
+
+    if verbose:
+        is_verbose = False
 
 
 @app.command()
