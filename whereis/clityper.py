@@ -45,6 +45,16 @@ def _gen_entry_table(entry_: Entry) -> Table:
     return table
 
 
+def _get_database(location: Path) -> Database:
+    database: Database = Database(location)
+    _log(f"Got database, {database}")
+    if not database.exists():
+        levels.info("Database doesn't exist, creating...")
+        database.create()
+
+    return database
+
+
 @app.callback()
 def root(verbose: bool = typer.Option(False, help="Enable verbose output.")) -> None:
     global is_verbose
@@ -61,12 +71,8 @@ def find(
     ),
 ) -> None:
     """Find an entry with the name NAME"""
-    database: Database = Database(database_location)
-    _log(f"Got database, {database}")
+    database: Database = _get_database(database_location)
     entry_: Optional[Entry] = _get_entry(name, database)
-    if not database.exists():
-        levels.info("Database doesn't exist, creating...")
-        database.create()
     if not entry_:
         return
     table: Table = _gen_entry_table(entry_)
