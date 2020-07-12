@@ -19,6 +19,7 @@ from pathlib import Path
 import os
 from whereis import exceptions, utils
 import shutil
+from rich.table import Table
 
 
 class Entry:
@@ -240,6 +241,20 @@ class Database:
             True if the folder contacting the database exists, else False
         """
         return self.location.exists()
+
+    def __rich__(self) -> Table:
+        table: Table = Table(title="Database Info")
+        table.add_column("Info")
+        table.add_column("Answer")
+        map_: Dict[str, str] = {
+            "Location": str(self.location),
+            "Entries": "\n".join(str(entry) for entry in self.entries),
+            "Exists": utils.format_bool(self.exists()),
+        }
+        for info, answer in map_.items():
+            table.add_row(info, answer)
+
+        return table
 
     def __add__(self, other: Entry) -> None:
         return self.add(other)

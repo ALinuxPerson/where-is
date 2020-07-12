@@ -96,3 +96,7 @@ def sp_call(command: str):
     process.wait()  # wait for process to return an exit code
     stdout, stderr = process.communicate()
     return out(bytes_to_string(stdout), bytes_to_string(stderr), process.returncode)
+
+
+def format_bool(boolean: bool) -> str:
+    return f"[green4 italic]{boolean}" if boolean else f"[red italic]{boolean}"
