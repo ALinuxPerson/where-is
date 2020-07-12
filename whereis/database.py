@@ -128,7 +128,6 @@ class Database:
             location: The location where the database is. Defaults to the config folder.
         """
         self._location = location
-        self._not_exists_ok: bool = False
 
     @property
     def location(self) -> Path:
@@ -140,11 +139,6 @@ class Database:
         Raises:
             NotADirectoryError: When the database folder doesn't exist.
         """
-        if (
-            not self._location.is_dir() or not self._location.exists()
-        ) and not self._not_exists_ok:
-            # keyword being 'folder'
-            raise NotADirectoryError("The database folder must exist!")
         return self._location
 
     @property
@@ -233,11 +227,20 @@ class Database:
         Returns:
             Nothing.
         """
+        if self.exists():
+            raise FileExistsError("The database already exists!")
         sample_db: Path = Path(__file__).parent / "database"
-        self._not_exists_ok = True
         Path(self.location).mkdir()
         for path in sample_db.iterdir():
             shutil.copyfile(str(path), str(self.location / path.name))
+
+    def exists(self) -> bool:
+        """Check if the database exists.
+
+        Returns:
+            True if the folder contacting the database exists, else False
+        """
+        return self.location.exists()
 
     def __add__(self, other: Entry) -> None:
         return self.add(other)
