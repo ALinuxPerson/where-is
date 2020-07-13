@@ -2,7 +2,6 @@ import typer
 from pathlib import Path
 from whereis import utils, levels, Database, Entry, input, version
 from typing import Optional, List
-from rich.table import Table
 from rich import print
 from rich.console import Console
 
