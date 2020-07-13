@@ -18,10 +18,7 @@ VERSION_STRING: str = f"""[bold dark_blue]  ---       [/][italic]where-is[/] {ve
 
 
 def _log(message: str) -> None:
-    try:
-        return levels.debug(message) if is_verbose else None
-    except (ValueError, TypeError):
-        levels.error(f"WIS_VERBOSE isn't a valid boolean.")
+    return levels.debug(message) if is_verbose else None
 
 
 def _get_entry(
