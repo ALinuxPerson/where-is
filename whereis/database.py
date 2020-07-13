@@ -116,6 +116,33 @@ class Entry:
         except AttributeError:
             return False
 
+    def __rich__(self) -> Table:
+        columns: List[str] = ["Locations", "Exists", "Is File", "Is Folder"]
+        table: Table = Table(title="[bold purple]Config files found")
+        for column in columns:
+            table.add_column(column)
+        for location, exists in self.locations_exists().items():
+            formatted_location: str = f"[magenta]{location}"
+            formatted_exists: str = f"[red]{exists}" if not exists else f"[green4]{exists}"
+
+            if exists and location.is_file():
+                is_file: str = "[green4]True"
+            elif exists and not location.is_file():
+                is_file = "[red]False"
+            else:
+                is_file = "[red italic]Unknown"
+
+            if exists and location.is_dir():
+                is_dir: str = "[green]True"
+            elif exists and not location.is_dir():
+                is_dir = "[red]False"
+            else:
+                is_dir = "[red italic]Unknown"
+
+            table.add_row(formatted_location, formatted_exists, is_file, is_dir)
+
+        return table
+
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} object: name='{self.name}' locations={self.locations}>"
 
