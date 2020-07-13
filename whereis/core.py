@@ -102,7 +102,9 @@ class Entry:
         try:
             return path.format(**format_map)
         except (KeyError, IndexError, ValueError):
-            raise KeyError(f"Format map not supported for path '{path}'.") from None
+            raise exceptions.FormatMapError(
+                f"Format map not supported for path '{path}'."
+            ) from None
 
     def locations_exists(self) -> Dict[Path, bool]:
         """Does each location exist?
@@ -188,7 +190,7 @@ class Database:
                 try:
                     ret.append(json.loads(entry.read_text()))
                 except json.decoder.JSONDecodeError as error:
-                    raise ValueError(
+                    raise exceptions.EntryParseError(
                         f"Error parsing '{entry.absolute()}': {error}"
                     ) from None
 
@@ -210,7 +212,9 @@ class Database:
         try:
             return Entry(raw_entry["name"], *raw_entry["locations"])  # type: ignore
         except KeyError:
-            raise ValueError(f"JSON schema incorrect: {raw_entry}") from None
+            raise exceptions.EntryParseError(
+                f"JSON schema incorrect: {raw_entry}"
+            ) from None
 
     @property
     def entries(self) -> List[Entry]:
@@ -262,7 +266,7 @@ class Database:
             Nothing.
         """
         if self.exists():
-            raise FileExistsError("The database already exists!")
+            raise exceptions.DatabaseExistsError("The database already exists!")
         sample_db: Path = Path(__file__).parent / "database"
         Path(self.location).mkdir()
         for path in sample_db.iterdir():

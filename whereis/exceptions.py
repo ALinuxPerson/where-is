@@ -43,3 +43,15 @@ class EntryExistsError(WhereIsException):
 
 class EntryDoesNotExistError(WhereIsException):
     """Raised when a database entry doesn't exist."""
+
+
+class FormatMapError(WhereIsException):
+    """Raised when a format map is invalid."""
+
+
+class EntryParseError(WhereIsException):
+    """Raised when an error is encountered during parsing of a json entry."""
+
+
+class DatabaseExistsError(WhereIsException):
+    """Raised when a database exists."""

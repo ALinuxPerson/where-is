@@ -1,6 +1,6 @@
 import typer
 from pathlib import Path
-from whereis import utils, levels, Database, Entry, input, version
+from whereis import utils, levels, Database, Entry, input, version, exceptions
 from typing import Optional, List
 from rich import print
 from rich.console import Console
@@ -25,9 +25,13 @@ def _get_entry(
 ) -> Optional[Entry]:
     for entry_ in database.entries:
         _log(f"Checking if [bold]'{entry_.name}'[/] == [bold]'{entry_name}'[/]...")
-        if entry_.name == entry_name:
-            _log(f"Got entry, {entry_}")
-            return entry_
+        try:
+            if entry_.name == entry_name:
+                _log(f"Got entry, {entry_}")
+                return entry_
+        except exceptions.FormatMapError as error:
+            levels.error(f"Entry formatting error: [italic]{error.message}")
+            return None
     else:
         if not no_err:
             levels.error(f"Couldn't find entry '{entry_name}' in the database.")
@@ -65,8 +69,8 @@ def _get_database(location: Path) -> Optional[Database]:
             return None
     try:
         _: List[Entry] = database.entries
-    except ValueError as error:
-        levels.error(f"Database error: [italic]{error.args[0]}")
+    except exceptions.EntryParseError as error:
+        levels.error(f"Database error: [italic]{error.message}")
         return None
     _log(f"Got database, {database}")
 
@@ -161,7 +165,12 @@ def cli_database(
     if not _eval_db_opts(info, add, remove) or not database:
         return
     if info:
-        return print(database)
+        try:
+            return print(database)
+        except exceptions.FormatMapError as error:
+            levels.error(
+                f"Unable to create table:\n" f"Entry formatting error: [italic]{error}"
+            )
     elif add:
         _add_entry(database)
     elif remove:
