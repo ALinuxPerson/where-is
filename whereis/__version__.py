@@ -1,4 +1,3 @@
-from typing import Tuple
 from pathlib import Path
 
 _version_file: Path = Path(__file__).parent.parent / "VERSION"
