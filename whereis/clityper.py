@@ -168,7 +168,9 @@ def cli_database(
     elif remove:
         _rm_entry(database)
     else:
-        levels.info("What do you want to do? pass the '--help' argument to get help.")
+        levels.info(
+            "What do you want to do? pass the [bold]'--help'[/] argument to get help."
+        )
 
 
 def main() -> None:
