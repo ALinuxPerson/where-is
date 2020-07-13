@@ -117,6 +117,11 @@ def debug(message: str) -> None:
 
 
 def _test_levels() -> None:
+    """Tests levels.
+
+    Returns:
+        Nothing.
+    """
     levels = [info, success, warn, error, debug]
     for level in levels:
         level("Hello, World!")  # type: ignore
