@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from whereis.database import *
+from whereis.core import *
 from whereis import levels
 from rich.traceback import Traceback, TracebackType
 from rich.console import Console
