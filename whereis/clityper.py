@@ -98,10 +98,11 @@ def _add_entry(database: Database) -> bool:
     return True
 
 
-def show_version() -> None:
-    console: Console = Console()
-    console.print(VERSION_STRING, style="blue")
-    raise typer.Exit()
+def show_version(value: bool) -> None:
+    if value:
+        console: Console = Console()
+        console.print(VERSION_STRING, style="blue")
+        raise typer.Exit()
 
 
 # noinspection PyUnusedLocal
