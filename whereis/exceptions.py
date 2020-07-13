@@ -18,6 +18,24 @@
 class WhereIsException(Exception):
     """Base class for all where-is related exceptions."""
 
+    @property
+    def message(self) -> str:
+        """Gets error message.
+
+        Returns:
+            The error message.
+        """
+        return self.args[0]
+
+    @property
+    def name(self) -> str:
+        """Gets the error name.
+
+        Returns:
+            The error name.
+        """
+        return self.__class__.__name__
+
 
 class EntryExistsError(WhereIsException):
     """Raised when a database entry exists."""
