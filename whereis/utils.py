@@ -15,12 +15,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from pathlib import Path
 import platform
-from typing import Dict, Optional, List, NamedTuple, Type
+from typing import Dict
 import os
 import random
 import string
-import shutil
-import subprocess
 
 
 def config_folder(system: str = platform.system()) -> Path:
@@ -55,48 +53,3 @@ def generate_string(num_range: int = 8) -> str:
         A random string.
     """
     return "".join(random.choice(string.ascii_letters) for _ in range(num_range))
-
-
-def get_text_editor() -> Optional[str]:
-    to_find: List[str] = [
-        os.getenv("EDITOR", ""),
-        "micro",
-        "nano",
-        "vim",
-        "emacs",
-        "vi",
-        "subl",
-        "vscode",
-        "kate",
-        "geany",
-        "gedit",
-        "notepad++.exe",
-        "notepad.exe",
-        "ed",
-    ]
-    for program in to_find:
-        found: Optional[str] = shutil.which(program)
-        if not found:
-            continue
-        else:
-            return found
-    else:
-        return None
-
-
-def bytes_to_string(bytes_obj: bytes, encoding: str = "utf-8") -> str:
-    return bytes_obj.decode(encoding)
-
-
-def sp_call(command: str):
-    out = NamedTuple("Output", [("stdout", str), ("stderr", str), ("return_code", int)])
-    process: subprocess.Popen = subprocess.Popen(
-        command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
-    process.wait()  # wait for process to return an exit code
-    stdout, stderr = process.communicate()
-    return out(bytes_to_string(stdout), bytes_to_string(stderr), process.returncode)
-
-
-def format_bool(boolean: bool) -> str:
-    return f"[green4 italic]{boolean}" if boolean else f"[red italic]{boolean}"
