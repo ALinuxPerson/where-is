@@ -114,3 +114,17 @@ def debug(message: str) -> None:
     """
     for line in message.splitlines():
         _console.log(f"[cyan]🔍 {line}")
+
+
+def _test_levels() -> None:
+    levels = [info, success, warn, error, debug]
+    for level in levels:
+        level("Hello, World!")  # type: ignore
+        try:
+            level("No icon!", no_icon=True)  # type: ignore
+        except TypeError:
+            pass
+
+
+if __name__ == "__main__":
+    _test_levels()
