@@ -13,6 +13,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""The core of where-is. This is where the CLI frontend gets its objects from."""
 import json
 from typing import List, Dict, Union
 from pathlib import Path
@@ -20,6 +21,7 @@ import os
 from whereis import exceptions, utils
 import shutil
 from rich.table import Table
+from rich.tabulate import tabulate_mapping
 
 
 class Entry:
@@ -117,6 +119,11 @@ class Entry:
             return False
 
     def __rich__(self) -> Table:
+        """A shortcut to generate a table to generate configuration files found.
+
+        Returns:
+            A table object, usable by rich print instances.
+        """
         columns: List[str] = ["Locations", "Exists", "Is File", "Is Folder"]
         table: Table = Table(title="[bold purple]Config files found")
         for column in columns:
@@ -270,23 +277,40 @@ class Database:
         return self.location.exists()
 
     def __rich__(self) -> Table:
-        table: Table = Table(title="Database Info")
-        table.add_column("Info")
-        table.add_column("Answer")
-        map_: Dict[str, str] = {
-            "Location": str(self.location),
-            "Entries": "\n".join(str(entry) for entry in self.entries),
-            "Exists": utils.format_bool(self.exists()),
+        """A shortcut to generate database info.
+
+        Returns:
+            A table, usable by rich print instances.
+        """
+        map_: Dict[str, Union[Path, List[Entry], bool]] = {
+            "Location": self.location,
+            "Entries": self.entries,
+            "Exists": self.exists(),
         }
-        for info, answer in map_.items():
-            table.add_row(info, answer)
+        table: Table = tabulate_mapping(map_, title="Database Info")
 
         return table
 
     def __add__(self, other: Entry) -> None:
+        """A python native shortcut of database.add().
+
+        Args:
+            other: The other class (should be an Entry object)
+
+        Returns:
+            Nothing.
+        """
         return self.add(other)
 
     def __sub__(self, other: Entry) -> None:
+        """A python native shortcut of database.remove().
+
+        Args:
+            other: The other class (should be an Entry object)
+
+        Returns:
+            Nothing.
+        """
         return self.remove(other)
 
     def __repr__(self) -> str:
