@@ -1,14 +1,20 @@
 import typer
 from pathlib import Path
-from whereis import utils, levels, Database, Entry, input
+from whereis import utils, levels, Database, Entry, input, version
 from typing import Optional, List, Dict
 from rich.table import Table
 from rich import print
+from rich.console import Console
 
 app: typer.Typer = typer.Typer(
     help="An elegant way to find configuration files (and folders)."
 )
 is_verbose: bool = False
+VERSION_STRING: str = f"""[bold dark_blue]  ---       [/][italic]where-is[/] {version} Copyright (C) 2020
+[bold dark_blue] /          [/]Made by [italic bold]ALinuxPerson[/].
+[bold dark_blue]<  ?
+ \\          [/][italic]This program comes with [bold]ABSOLUTELY NO WARRANTY[/]; This is free software,
+[bold dark_blue]  ---       [/]and you are welcome to redistribute it under certain conditions."""
 
 
 def _log(message: str) -> None:
@@ -95,8 +101,23 @@ def _add_entry(database: Database) -> bool:
     return True
 
 
+def show_version() -> None:
+    console: Console = Console()
+    console.print(VERSION_STRING, style="blue")
+    raise typer.Exit()
+
+
+# noinspection PyUnusedLocal
 @app.callback()
-def root(verbose: bool = typer.Option(False, help="Enable verbose output.")) -> None:
+def root(
+    verbose: bool = typer.Option(False, help="Enable verbose output."),
+    version_: bool = typer.Option(
+        None,
+        "--version",
+        help="Show this program's version number and credits",
+        callback=show_version,
+    ),
+) -> None:
     global is_verbose
 
     if verbose:

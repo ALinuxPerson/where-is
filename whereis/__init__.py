@@ -19,6 +19,7 @@ from rich.traceback import Traceback, TracebackType
 from rich.console import Console
 from typing import Type, Text
 import sys
+from whereis.__version__ import __version__ as version
 
 
 def excepthook(
