@@ -39,21 +39,6 @@ def _get_entry(
         return None
 
 
-def _gen_entry_table(entry_: Entry) -> Table:
-    columns: List[str] = ["Locations", "Exists", "Is File", "Is Folder"]
-    table: Table = Table(title="[bold purple]Config files found")
-    for column in columns:
-        table.add_column(column)
-    for location, exists in entry_.locations_exists().items():
-        formatted_location: str = f"[magenta]{location}"
-        formatted_exists: str = f"[red]{exists}" if not exists else f"[green4]{exists}"
-        is_file: str = f"[blue]{location.is_file()}" if exists else "[blue italic]Unknown"
-        is_dir: str = f"[blue]{location.is_dir()}" if exists else "[blue italic]Unknown"
-        table.add_row(formatted_location, formatted_exists, is_file, is_dir)
-
-    return table
-
-
 def _eval_db_opts(info: bool, add: bool, remove: bool) -> bool:
     _log(f"Got options:\n" f"info: {info}, add: {add}, remove: {remove}")
     if info and add or info and remove:
@@ -71,8 +56,14 @@ def _eval_db_opts(info: bool, add: bool, remove: bool) -> bool:
 def _get_database(location: Path) -> Optional[Database]:
     database: Database = Database(location)
     if not database.exists():
-        levels.info("Database doesn't exist, creating...")
-        database.create()
+        try:
+            levels.info("Database doesn't exist, creating...")
+            database.create()
+        except PermissionError as error:
+            levels.error(
+                f"Can't create database at location '{location}': [italic]{error}"
+            )
+            return None
     try:
         _: List[Entry] = database.entries
     except ValueError as error:
@@ -150,8 +141,7 @@ def find(
     entry_: Optional[Entry] = _get_entry(name, database)
     if not entry_:
         return
-    table: Table = _gen_entry_table(entry_)
-    return print(table)
+    print(entry_)
 
 
 @app.command("database")
