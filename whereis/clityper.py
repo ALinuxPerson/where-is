@@ -98,7 +98,7 @@ def _add_entry(database: Database) -> bool:
     return True
 
 
-def show_version(value: bool) -> None:
+def _show_version(value: bool) -> None:
     if value:
         console: Console = Console()
         console.print(VERSION_STRING, style="blue")
@@ -113,7 +113,7 @@ def root(
         None,
         "--version",
         help="Show this program's version number and credits",
-        callback=show_version,
+        callback=_show_version,
     ),
 ) -> None:
     global is_verbose
