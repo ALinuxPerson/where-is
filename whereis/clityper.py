@@ -98,6 +98,15 @@ def _add_entry(database: Database) -> bool:
     return True
 
 
+def _rm_entry(database: Database) -> None:
+    levels.info("Enter the name of the entry: ")
+    entry: Optional[Entry] = _get_entry(input("[blue]Entry name: "), database)
+    if not entry:
+        return
+    database -= entry  # type: ignore
+    levels.success("Removed entry from the database.")
+
+
 def _show_version(value: bool) -> None:
     if value:
         console: Console = Console()
@@ -160,7 +169,7 @@ def cli_database(
     elif add:
         _add_entry(database)
     elif remove:
-        pass
+        _rm_entry(database)
     else:
         levels.info("What do you want to do? pass the '--help' argument to get help.")
 
