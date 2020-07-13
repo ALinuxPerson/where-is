@@ -19,6 +19,10 @@ from rich.console import Console
 from pathlib import Path
 import fire  # type: ignore
 from rich import print
+import subprocess
+from typing import Dict, Union, List, Optional
+import tempfile
+import json
 
 
 def _get_version() -> str:
@@ -30,6 +34,46 @@ VERSION_STRING: str = f"""[bold green4]  ---       [/]where-is {_get_version()} 
 [bold green4]<  ?
  \\          [/][italic]This program comes with [bold]ABSOLUTELY NO WARRANTY[/]; This is free software,
 [bold green4]  ---       [/]and you are welcome to redistribute it under certain conditions."""
+
+
+def new_entry(
+    name: str,
+    database_location: str,
+    text_editor: Optional[str] = utils.get_text_editor(),
+) -> None:
+    if not text_editor:
+        levels.error(f"Couldn't find any text editor in the system.")
+        return
+
+    temp: Dict[str, Union[str, List[List[str]]]] = {
+        "_comment": "Format map for locations: \n"
+        "{HOME}: Your home folder.\n"
+        "{WHEREIS_CONFIG}: The where-is configuration folder.\n"
+        "{CONFIG_FOLDER}: The configuration folder.",
+        "name": name,
+        "locations": [["ENTER HERE"]],
+    }
+    temp_path: Path = Path(
+        tempfile.gettempdir()
+    ) / f"where-is-{utils.generate_string()}.tmp"
+
+    with temp_path.open("w") as tmp:
+        tmp.write(json.dumps(temp))
+
+    called = utils.sp_call(f"{utils.get_text_editor()} {temp_path.absolute()}")
+
+    if called.return_code != 0:
+        levels.error(
+            f"Process gave non-zero exit code (failure).\n"
+            f"stdout:\n"
+            f"{called.stdout or '(nothing)'}\n\n"
+            f"stderr:\n"
+            f"{called.stderr or '(nothing)'}"
+        )
+        return
+
+    levels.info("Moving entry to database...")
+    temp_path.replace(Path(database_location) / f"{name}.json")
 
 
 def _check_for_db_entries(database: Database) -> bool:
@@ -110,7 +154,10 @@ def show_version() -> None:
 
 
 def cli(
-    name: str = None, database_location: str = None, version: bool = False,
+    name: str = None,
+    database_location: str = None,
+    version: bool = False,
+    new: bool = False,
 ) -> None:
     """Finds configuration files.
 
@@ -118,6 +165,7 @@ def cli(
         name: The name of the entry to search for.
         database_location: The database to search for the entry. Defaults to the where-is config folder.
         version: Show this program's version number and credits then exit.
+        new: Create a new entry with the name argument.
 
     Returns:
         Nothing.
@@ -133,6 +181,8 @@ def cli(
                     "What do you want to do? Pass the '-h' or '--help' argument to get more info."
                 )
             return
+        if new:
+            return new_entry(name, database_location or str(utils.config_folder()))
         find(name, database_location or str(utils.config_folder()))
 
 
