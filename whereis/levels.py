@@ -36,10 +36,10 @@ def _levels(
         Nothing.
     """
     to_message: Dict[str, str] = {
-        "info": " [dark_blue]{icon} [blue]{line}",
-        "success": " [dark_green]{icon} [green4]{line}",
-        "warn": " [yellow]{icon} [yellow3]{line}",
-        "error": " [dark_red]{icon} [red]{line}",
+        "info": " [bold][dark_blue]{icon} [blue]{line}",
+        "success": " [bold][dark_green]{icon} [green4]{line}",
+        "warn": " [bold][yellow]{icon} [yellow3]{line}",
+        "error": " [bold][dark_red]{icon} [red]{line}",
     }
     icon: Dict[str, str] = {"info": "🛈", "success": "✓", "warn": "⚠", "error": "✗"}
 
