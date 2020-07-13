@@ -97,9 +97,9 @@ def _add_entry(database: Database) -> bool:
             entry_locations.append(entry_location)
         except KeyboardInterrupt:
             break
-    entry: Entry = Entry(entry_name, *entry_locations)  # type: ignore
+    entry: Entry = Entry(entry_name, *[Path(entry_).parts for entry_ in entry_locations])  # type: ignore
     database += entry  # type: ignore
-    print("Added entry to database.")
+    levels.success("Added entry to database.")
     return True
 
 
@@ -167,7 +167,7 @@ def cli_database(
         False, "--remove", help="Remove the entry from the database."
     ),
 ) -> None:
-    """Query, add and remove the entry with the name NAME."""
+    """Query, add and remove entries from the database."""
     database: Optional[Database] = _get_database(location)
     if not _eval_db_opts(info, add, remove) or not database:
         return
