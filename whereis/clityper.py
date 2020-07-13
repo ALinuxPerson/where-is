@@ -68,12 +68,17 @@ def _eval_db_opts(info: bool, add: bool, remove: bool) -> bool:
         return True
 
 
-def _get_database(location: Path) -> Database:
+def _get_database(location: Path) -> Optional[Database]:
     database: Database = Database(location)
-    _log(f"Got database, {database}")
     if not database.exists():
         levels.info("Database doesn't exist, creating...")
         database.create()
+    try:
+        _: List[Entry] = database.entries
+    except ValueError as error:
+        levels.error(f"Database error: [italic]{error.args[0]}")
+        return None
+    _log(f"Got database, {database}")
 
     return database
 
@@ -139,7 +144,9 @@ def find(
     ),
 ) -> None:
     """Find an entry with the name NAME"""
-    database: Database = _get_database(database_location)
+    database: Optional[Database] = _get_database(database_location)
+    if not database:
+        return
     entry_: Optional[Entry] = _get_entry(name, database)
     if not entry_:
         return
@@ -161,8 +168,8 @@ def cli_database(
     ),
 ) -> None:
     """Query, add and remove the entry with the name NAME."""
-    database: Database = _get_database(location)
-    if not _eval_db_opts(info, add, remove):
+    database: Optional[Database] = _get_database(location)
+    if not _eval_db_opts(info, add, remove) or not database:
         return
     if info:
         return print(database)
