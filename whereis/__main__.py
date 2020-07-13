@@ -47,7 +47,7 @@ def main() -> None:
     if False in (process_imports(package_name) for package_name in to_import):
         sys.exit(2)
 
-    from whereis.clityper import main as cli_main
+    from whereis.cli import main as cli_main
 
     return cli_main()
 

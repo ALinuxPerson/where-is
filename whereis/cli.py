@@ -1,190 +1,176 @@
-# where-is: Finds config files.
-# Copyright (C) 2020 ALinuxPerson
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from whereis import Database, Entry, levels, utils
-from rich.table import Table
-from rich.console import Console
+import typer
 from pathlib import Path
-import fire  # type: ignore
+from whereis import utils, levels, Database, Entry, input, version
+from typing import Optional, List
 from rich import print
-import subprocess
-from typing import Dict, Union, List, Optional
-import tempfile
-import json
+from rich.console import Console
 
-
-def _get_version() -> str:
-    return (Path(__file__).parent.parent / "VERSION").read_text().strip()
-
-
-VERSION_STRING: str = f"""[bold green4]  ---       [/]where-is {_get_version()} Copyright (C) 2020
-[bold green4] /          [/]Made by [underline]ALinuxPerson[/].
-[bold green4]<  ?
+app: typer.Typer = typer.Typer(
+    help="An elegant way to find configuration files (and folders)."
+)
+is_verbose: bool = False
+VERSION_STRING: str = f"""[bold dark_blue]  ---       [/][italic]where-is[/] {version} Copyright (C) 2020
+[bold dark_blue] /          [/]Made by [italic bold]ALinuxPerson[/].
+[bold dark_blue]<  ?
  \\          [/][italic]This program comes with [bold]ABSOLUTELY NO WARRANTY[/]; This is free software,
-[bold green4]  ---       [/]and you are welcome to redistribute it under certain conditions."""
+[bold dark_blue]  ---       [/]and you are welcome to redistribute it under certain conditions."""
 
 
-def new_entry(
-    name: str,
-    database_location: str,
-    text_editor: Optional[str] = utils.get_text_editor(),
-) -> None:
-    if not text_editor:
-        levels.error(f"Couldn't find any text editor in the system.")
-        return
+def _log(message: str) -> None:
+    return levels.debug(message) if is_verbose else None
 
-    temp: Dict[str, Union[str, List[List[str]]]] = {
-        "_comment": "Format map for locations: \n"
-        "{HOME}: Your home folder.\n"
-        "{WHEREIS_CONFIG}: The where-is configuration folder.\n"
-        "{CONFIG_FOLDER}: The configuration folder.",
-        "name": name,
-        "locations": [["ENTER HERE"]],
-    }
-    temp_path: Path = Path(
-        tempfile.gettempdir()
-    ) / f"where-is-{utils.generate_string()}.tmp"
 
-    with temp_path.open("w") as tmp:
-        tmp.write(json.dumps(temp))
+def _get_entry(
+    entry_name: str, database: Database, no_err: bool = False
+) -> Optional[Entry]:
+    for entry_ in database.entries:
+        _log(f"Checking if [bold]'{entry_.name}'[/] == [bold]'{entry_name}'[/]...")
+        if entry_.name == entry_name:
+            _log(f"Got entry, {entry_}")
+            return entry_
+    else:
+        if not no_err:
+            levels.error(f"Couldn't find entry '{entry_name}' in the database.")
+        else:
+            _log(
+                f"Couldn't find any entry, but the no_err argument is True, so not printing any errors."
+            )
+        return None
 
-    called = utils.sp_call(f"{utils.get_text_editor()} {temp_path.absolute()}")
 
-    if called.return_code != 0:
+def _eval_db_opts(info: bool, add: bool, remove: bool) -> bool:
+    _log(f"Got options:\n" f"info: {info}, add: {add}, remove: {remove}")
+    if info and add or info and remove:
         levels.error(
-            f"Process gave non-zero exit code (failure).\n"
-            f"stdout:\n"
-            f"{called.stdout or '(nothing)'}\n\n"
-            f"stderr:\n"
-            f"{called.stderr or '(nothing)'}"
+            f"The info option is mutually exclusive with the add and remove options."
         )
-        return
-
-    levels.info("Moving entry to database...")
-    temp_path.replace(Path(database_location) / f"{name}.json")
-
-
-def _check_for_db_entries(database: Database) -> bool:
-    if not database.entries:
-        levels.error("Couldn't find any entries in the database.")
+        return False
+    elif add and remove:
+        levels.error("The add and remove options are mutually exclusive.")
         return False
     else:
         return True
 
 
-def find(name: str, database_location: str = str(utils.config_folder())) -> None:
-    while True:
+def _get_database(location: Path) -> Optional[Database]:
+    database: Database = Database(location)
+    if not database.exists():
         try:
-            database_location: Path = Path(database_location)  # type: ignore
-            database: Database = Database(database_location)  # type: ignore
-            try:
-                if not _check_for_db_entries(database):
-                    return
-            except ValueError as error:
-                levels.error(f"Parse failure: {error}")
-                return
-            break
-        except TypeError:
-            levels.error(
-                "You aren't supposed to pass '--database-location' like a flag."
-            )
-            return
-        except NotADirectoryError:
-            if database_location.exists():  # type: ignore
-                levels.error(
-                    "The database location exists and is a file. Either,\n"
-                    "a.) Remove that file then try again, or\n"
-                    "b.) Choose another database location by passing '--database-location <DB_LOCATION>'."
-                )
-                return
-            else:
-                levels.info("Database doesn't exist, creating.")
-                # noinspection PyUnboundLocalVariable
-                database.create()
-    table: Table = Table(title="[bold]Config files found")
-    table.add_column("Locations")
-    table.add_column("Exists")
-    table.add_column("Is a file?")
-    while True:
-        try:
-            entry: Entry = next(
-                iter([entry for entry in database.entries if entry.name == name])
-            )
-            break
-        except StopIteration:
-            levels.error(f"Couldn't find the entry '{name}'.")
-            return
-        except NotADirectoryError:
-            levels.info("Database doesn't exist, creating.")
+            levels.info("Database doesn't exist, creating...")
             database.create()
-            continue
-    try:
-        # noinspection PyUnboundLocalVariable
-        for location, exists in entry.locations_exists().items():
-            table.add_row(
-                f"[green4 bold]{location}",
-                f"[green4 bold]{exists}" if exists else f"[red bold]{exists}",
-                f"[blue]{location.is_file()}" if exists else "[blue italic]Unknown",
+        except PermissionError as error:
+            levels.error(
+                f"Can't create database at location '{location}': [italic]{error}"
             )
-    except KeyError as error:
-        levels.error(
-            f"Couldn't parse path:\n"
-            f"[bold]{error.__class__.__name__}:[/] [italic]{error}"
-        )
+            return None
+    try:
+        _: List[Entry] = database.entries
+    except ValueError as error:
+        levels.error(f"Database error: [italic]{error.args[0]}")
+        return None
+    _log(f"Got database, {database}")
+
+    return database
+
+
+def _add_entry(database: Database) -> bool:
+    levels.info("Enter the name of the entry.")
+    entry_name: str = input("[blue]Entry name: ")
+    if entry_name in [entry.name for entry in database.entries]:
+        levels.error("That entry already exists.")
+        return False
+    entry_locations: List[str] = []
+    levels.info("Enter locations for the entry. Press ctrl-C to finish.")
+    while True:
+        try:
+            entry_location: str = input("[blue]Entry locations: ")
+            entry_locations.append(entry_location)
+        except KeyboardInterrupt:
+            break
+    entry: Entry = Entry(entry_name, *[Path(entry_).parts for entry_ in entry_locations])  # type: ignore
+    database += entry  # type: ignore
+    levels.success("Added entry to database.")
+    return True
+
+
+def _rm_entry(database: Database) -> None:
+    levels.info("Enter the name of the entry: ")
+    entry: Optional[Entry] = _get_entry(input("[blue]Entry name: "), database)
+    if not entry:
         return
-
-    print(table)
-
-
-def show_version() -> None:
-    console: Console = Console()
-    console.print(VERSION_STRING, style="blue")
+    database -= entry  # type: ignore
+    levels.success("Removed entry from the database.")
 
 
-def cli(
-    name: str = None,
-    database_location: str = None,
-    version: bool = False,
-    new: bool = False,
+def _show_version(value: bool) -> None:
+    if value:
+        console: Console = Console()
+        console.print(VERSION_STRING, style="blue")
+        raise typer.Exit()
+
+
+# noinspection PyUnusedLocal
+@app.callback()
+def root(
+    verbose: bool = typer.Option(False, help="Enable verbose output."),
+    version_: bool = typer.Option(
+        None,
+        "--version",
+        help="Show this program's version number and credits",
+        callback=_show_version,
+    ),
 ) -> None:
-    """Finds configuration files.
+    global is_verbose
 
-    Args:
-        name: The name of the entry to search for.
-        database_location: The database to search for the entry. Defaults to the where-is config folder.
-        version: Show this program's version number and credits then exit.
-        new: Create a new entry with the name argument.
+    if verbose:
+        is_verbose = True
 
-    Returns:
-        Nothing.
-    """
-    if version:
-        return show_version()
+
+@app.command()
+def find(
+    name: str = typer.Argument(..., help="The name of the entry."),
+    database_location: Path = typer.Option(
+        utils.config_folder(), help="The location of the database."
+    ),
+) -> None:
+    """Find an entry with the name NAME"""
+    database: Optional[Database] = _get_database(database_location)
+    if not database:
+        return
+    entry_: Optional[Entry] = _get_entry(name, database)
+    if not entry_:
+        return
+    print(entry_)
+
+
+@app.command("database")
+def cli_database(
+    location: Path = typer.Option(
+        utils.config_folder(), help="The location of the database."
+    ),
+    info: bool = typer.Option(
+        False, "--info", help="Show information about the entry."
+    ),
+    add: bool = typer.Option(False, "--add", help="Add the entry to the database."),
+    remove: bool = typer.Option(
+        False, "--remove", help="Remove the entry from the database."
+    ),
+) -> None:
+    """Query, add and remove entries from the database."""
+    database: Optional[Database] = _get_database(location)
+    if not _eval_db_opts(info, add, remove) or not database:
+        return
+    if info:
+        return print(database)
+    elif add:
+        _add_entry(database)
+    elif remove:
+        _rm_entry(database)
     else:
-        if not name:
-            if database_location:
-                levels.error("You need to pass the '-n' or '--name' argument first!")
-            else:
-                levels.info(
-                    "What do you want to do? Pass the '-h' or '--help' argument to get more info."
-                )
-            return
-        if new:
-            return new_entry(name, database_location or str(utils.config_folder()))
-        find(name, database_location or str(utils.config_folder()))
+        levels.info(
+            "What do you want to do? pass the [bold]'--help'[/] argument to get help."
+        )
 
 
 def main() -> None:
-    fire.Fire(cli)
+    return app()
