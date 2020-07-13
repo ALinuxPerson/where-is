@@ -17,7 +17,7 @@ from whereis.database import *
 from whereis import levels
 from rich.traceback import Traceback, TracebackType
 from rich.console import Console
-from typing import Type
+from typing import Type, Text
 import sys
 
 
@@ -52,3 +52,8 @@ def excepthook(
 
 
 sys.excepthook = excepthook
+
+
+def input(*prompt: Union[str, Text], markup: bool = True, emoji: bool = True) -> str:
+    console: Console = Console()
+    return console.input(*prompt, markup=markup, emoji=emoji)
