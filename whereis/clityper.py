@@ -1,8 +1,7 @@
 import typer
 from pathlib import Path
-from whereis import utils, levels, Database, Entry
-from typing import Optional, List
-import os
+from whereis import utils, levels, Database, Entry, input
+from typing import Optional, List, Dict
 from rich.table import Table
 from rich import print
 
@@ -19,14 +18,21 @@ def _log(message: str) -> None:
         levels.error(f"WIS_VERBOSE isn't a valid boolean.")
 
 
-def _get_entry(entry_name: str, database: Database) -> Optional[Entry]:
+def _get_entry(
+    entry_name: str, database: Database, no_err: bool = False
+) -> Optional[Entry]:
     for entry_ in database.entries:
         _log(f"Checking if [bold]'{entry_.name}'[/] == [bold]'{entry_name}'[/]...")
         if entry_.name == entry_name:
             _log(f"Got entry, {entry_}")
             return entry_
     else:
-        levels.error(f"Couldn't find entry '{entry_name}' in the database.")
+        if not no_err:
+            levels.error(f"Couldn't find entry '{entry_name}' in the database.")
+        else:
+            _log(
+                f"Couldn't find any entry, but the no_err argument is True, so not printing any errors."
+            )
         return None
 
 
@@ -45,6 +51,20 @@ def _gen_entry_table(entry_: Entry) -> Table:
     return table
 
 
+def _eval_db_opts(info: bool, add: bool, remove: bool) -> bool:
+    _log(f"Got options:\n" f"info: {info}, add: {add}, remove: {remove}")
+    if info and add or info and remove:
+        levels.error(
+            f"The info option is mutually exclusive with the add and remove options."
+        )
+        return False
+    elif add and remove:
+        levels.error("The add and remove options are mutually exclusive.")
+        return False
+    else:
+        return True
+
+
 def _get_database(location: Path) -> Database:
     database: Database = Database(location)
     _log(f"Got database, {database}")
@@ -53,6 +73,26 @@ def _get_database(location: Path) -> Database:
         database.create()
 
     return database
+
+
+def _add_entry(database: Database) -> bool:
+    levels.info("Enter the name of the entry.")
+    entry_name: str = input("[blue]Entry name: ")
+    if entry_name in [entry.name for entry in database.entries]:
+        levels.error("That entry already exists.")
+        return False
+    entry_locations: List[str] = []
+    levels.info("Enter locations for the entry. Press ctrl-C to finish.")
+    while True:
+        try:
+            entry_location: str = input("[blue]Entry locations: ")
+            entry_locations.append(entry_location)
+        except KeyboardInterrupt:
+            break
+    entry: Entry = Entry(entry_name, *entry_locations)  # type: ignore
+    database += entry  # type: ignore
+    print("Added entry to database.")
+    return True
 
 
 @app.callback()
@@ -79,17 +119,31 @@ def find(
     return print(table)
 
 
-@app.command()
-def entry(
-    name: str = typer.Argument(..., help="The name of the entry."),
-    database_location: Path = typer.Option(
+@app.command("database")
+def cli_database(
+    location: Path = typer.Option(
         utils.config_folder(), help="The location of the database."
     ),
-    info: bool = typer.Option(True, help="Show information about the entry."),
-    add: bool = typer.Option(False, help="Add the entry to the database."),
-    remove: bool = typer.Option(False, help="Remove the entry from the database."),
+    info: bool = typer.Option(
+        False, "--info", help="Show information about the entry."
+    ),
+    add: bool = typer.Option(False, "--add", help="Add the entry to the database."),
+    remove: bool = typer.Option(
+        False, "--remove", help="Remove the entry from the database."
+    ),
 ) -> None:
     """Query, add and remove the entry with the name NAME."""
+    database: Database = _get_database(location)
+    if not _eval_db_opts(info, add, remove):
+        return
+    if info:
+        return print(database)
+    elif add:
+        _add_entry(database)
+    elif remove:
+        pass
+    else:
+        levels.info("What do you want to do? pass the '--help' argument to get help.")
 
 
 def main() -> None:
