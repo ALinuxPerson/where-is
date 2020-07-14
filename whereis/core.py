@@ -44,7 +44,7 @@ class Entry:
             All of the locations an entry has.
         """
         return [
-            Path(self._format_path(os.path.join(os.path.sep, *location)))
+            Path(self._format_path(Path(os.path.join(os.path.sep, *location))))
             for location in self._locations
         ]
 
@@ -70,7 +70,7 @@ class Entry:
         return json.dumps(self.to_dict)
 
     @staticmethod
-    def _format_path(path: str) -> str:
+    def _format_path(path: Path) -> Path:
         """Formats a path.
 
         Args:
@@ -79,13 +79,20 @@ class Entry:
         Returns:
             The formatted path.
         """
-        format_map: Dict[str, str] = {
-            "HOME": str(Path().home()),
-            "WHEREIS_CONFIG": str(utils.config_folder()),
-            "CONFIG_FOLDER": str(utils.config_folder().parent),
+        format_map: Dict[str, Path] = {
+            "HOME": Path().home(),
+            "WHEREIS_CONFIG": utils.config_folder(),
+            "CONFIG_FOLDER": utils.config_folder().parent,
         }
         try:
-            return path.format(**format_map)
+            path_parts: List[str] = list(path.parts)
+            for index, part in enumerate(path_parts):
+                for name, value in format_map.items():
+                    if name in part:
+                        del path_parts[index]
+                        path_parts[index:index] = list(value.parts)
+
+            return Path(*path_parts)
         except (KeyError, IndexError, ValueError):
             raise exceptions.FormatMapError(
                 f"Format map not supported for path '{path}'."
