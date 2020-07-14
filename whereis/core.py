@@ -332,5 +332,27 @@ class Database:
         """
         return self.remove(other)
 
+    def __enter__(self):
+        """Create a temporary database. Useful for testing.
+
+        Returns:
+            Database: A database object.
+        """
+        self.create()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        """Deletes a database object after context manager exit. Useful for testing.
+
+        Args:
+            exc_type: The exception type.
+            exc_val: The exception value.
+            exc_tb: The traceback.
+
+        Returns:
+            Nothing.
+        """
+        self.delete()
+
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} object: location={self.location}>"
