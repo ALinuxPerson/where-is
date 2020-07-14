@@ -49,7 +49,7 @@ class Entry:
         ]
 
     @property
-    def to_dict(self) -> Dict[str, Union[str, List[List[str]]]]:
+    def _to_dict(self) -> Dict[str, Union[str, List[List[str]]]]:
         """Converts a entry object to a dictionary.
 
         Returns:
@@ -67,7 +67,7 @@ class Entry:
         Returns:
             Converted to json entry object.
         """
-        return json.dumps(self.to_dict)
+        return json.dumps(self._to_dict)
 
     @staticmethod
     def _format_path(path: Path) -> Path:
