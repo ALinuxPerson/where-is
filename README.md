@@ -8,7 +8,7 @@
 # Getting started
 ## Prerequisites
 - Unix/NT Based OS
-- Python>=3.5
+- Python>=3.6
 - Pip
 
 ## Installation
