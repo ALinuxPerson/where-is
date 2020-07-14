@@ -264,6 +264,9 @@ class Database:
 
         Returns:
             Nothing.
+
+        Raises:
+            DatabaseExistsError: If the database exists.
         """
         if self.exists():
             raise exceptions.DatabaseExistsError("The database already exists!")
@@ -271,6 +274,20 @@ class Database:
         Path(self.location).mkdir()
         for path in sample_db.iterdir():
             shutil.copyfile(str(path), str(self.location / path.name))
+
+    def delete(self) -> None:
+        """Deletes the database if it exists.
+
+        Notes:
+            There is no way to implement a python native shortcut for this because __del__ gets called after program
+            exit, which means the database will get deleted after program exit.
+
+        Returns:
+            Nothing.
+        """
+        if not self.location.exists():
+            raise exceptions.DatabaseNotFoundError("The database doesn't exist!")
+        return shutil.rmtree(self.location)
 
     def exists(self) -> bool:
         """Check if the database exists.

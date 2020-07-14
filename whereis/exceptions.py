@@ -55,3 +55,7 @@ class EntryParseError(WhereIsException):
 
 class DatabaseExistsError(WhereIsException):
     """Raised when a database exists."""
+
+
+class DatabaseNotFoundError(WhereIsException):
+    """Raised when a database isn't found."""
