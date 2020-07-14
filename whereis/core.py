@@ -255,7 +255,7 @@ class Database:
             EntryDoesNotExistError: If the entry object doesn't exist in the database entries.
         """
         if entry not in self.entries:
-            raise exceptions.EntryDoesNotExistError("The database entry must exist.")
+            raise exceptions.EntryNotFoundError("The database entry must exist.")
         entry_to_delete: Path = self.location / f"{entry.name}.json"
         entry_to_delete.unlink()
 

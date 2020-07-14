@@ -41,7 +41,7 @@ class EntryExistsError(WhereIsException):
     """Raised when a database entry exists."""
 
 
-class EntryDoesNotExistError(WhereIsException):
+class EntryNotFoundError(WhereIsException):
     """Raised when a database entry doesn't exist."""
 
 
