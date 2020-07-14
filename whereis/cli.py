@@ -10,7 +10,7 @@ app: typer.Typer = typer.Typer(
 )
 is_verbose: bool = False
 VERSION_STRING: str = f"""[bold dark_blue]  ---       [/][italic]where-is[/] {version} Copyright (C) 2020
-[bold dark_blue] /          [/]Made by [italic bold]ALinuxPerson[/].
+[bold dark_blue] /          [/]Made by [italic bold]ALinuxPerson[/]. This project uses the [italic bold]GNU GPLv3[/] license.
 [bold dark_blue]<  ?
  \\          [/][italic]This program comes with [bold]ABSOLUTELY NO WARRANTY[/]; This is free software,
 [bold dark_blue]  ---       [/]and you are welcome to redistribute it under certain conditions."""
@@ -106,6 +106,14 @@ def _rm_entry(database: Database) -> None:
     levels.success("Removed entry from the database.")
 
 
+def _del_db(database: Database) -> None:
+    try:
+        database.delete()
+        levels.success("Successfully deleted database.")
+    except exceptions.DatabaseNotFoundError as error:
+        levels.error(f"Error: [italic]{error}")
+
+
 def _show_version(value: bool) -> None:
     if value:
         console: Console = Console()
@@ -160,7 +168,9 @@ def cli_database(
     delete: bool = typer.Option(False, "--delete", help="Deletes the database."),
 ) -> None:
     """Query, add and remove entries from the database."""
-    database: Optional[Database] = _get_database(location)
+    database: Optional[Database] = _get_database(location) if not delete else Database(
+        location
+    )
     if not _eval_db_opts(info, add, remove, delete) or not database:
         return
     if info:
@@ -174,6 +184,8 @@ def cli_database(
         _add_entry(database)
     elif remove:
         _rm_entry(database)
+    elif delete:
+        _del_db(database)
     else:
         levels.info(
             "What do you want to do? pass the [bold]'--help'[/] argument to get help."
