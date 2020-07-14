@@ -57,7 +57,7 @@ class Entry:
         """
         return {
             "name": self.name,
-            "locations": self._locations,  # type: ignore
+            "locations": list(self._locations),
         }
 
     @property
