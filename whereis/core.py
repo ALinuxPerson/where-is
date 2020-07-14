@@ -310,27 +310,29 @@ class Database:
 
         return table
 
-    def __add__(self, other: Entry) -> None:
+    def __add__(self, other: Entry):
         """A python native shortcut of database.add().
 
         Args:
             other: The other class (should be an Entry object)
 
         Returns:
-            Nothing.
+            Database: The modified database.
         """
-        return self.add(other)
+        self.add(other)
+        return self
 
-    def __sub__(self, other: Entry) -> None:
+    def __sub__(self, other: Entry):
         """A python native shortcut of database.remove().
 
         Args:
             other: The other class (should be an Entry object)
 
         Returns:
-            Nothing.
+            Database: The modified database.
         """
-        return self.remove(other)
+        self.remove(other)
+        return self
 
     def __enter__(self):
         """Create a temporary database. Useful for testing.
