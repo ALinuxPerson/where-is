@@ -183,6 +183,9 @@ class Database:
 
         Returns:
             A list of dictionaries if the file owning that dictionary's suffix is '.json'.
+
+        Raises:
+            EntryParseError: If the entry JSON can't be decoded.
         """
         ret: List[Dict[str, Union[str, List[List[str]]]]] = []
         for entry in self.location.iterdir():
@@ -207,7 +210,7 @@ class Database:
             An entry object.
 
         Raises:
-            KeyError: If the raw entry doesn't follow the json schema.
+            EntryParseError: If the raw entry doesn't follow the json schema.
         """
         try:
             return Entry(raw_entry["name"], *raw_entry["locations"])  # type: ignore
@@ -284,6 +287,9 @@ class Database:
 
         Returns:
             Nothing.
+
+        Raises:
+            DatabaseNotFoundError: If the database doesn't exist.
         """
         if not self.location.exists():
             raise exceptions.DatabaseNotFoundError("The database doesn't exist!")
