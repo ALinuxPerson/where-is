@@ -334,5 +334,21 @@ class Database:
         """
         return self.remove(other)
 
+    def __delete__(self, instance) -> None:
+        """Deletes an instance with a special case for entry objects.
+
+        If an entry object tries to be deleted, it calls Database.remove(entry).
+
+        Args:
+            instance: The instance object.
+
+        Returns:
+            Nothing.
+        """
+        if isinstance(instance, Entry):
+            self.remove(instance)
+        del instance
+        return
+
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} object: location={self.location}>"
