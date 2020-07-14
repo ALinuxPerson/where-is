@@ -13,6 +13,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""The where-is package itself."""
 from whereis.core import *
 from whereis import levels
 from rich.traceback import Traceback, TracebackType
@@ -25,6 +26,16 @@ from whereis.__version__ import __version__ as version
 def excepthook(
     type_: Type[BaseException], value: BaseException, traceback: TracebackType,
 ) -> None:
+    """The except hook used globally by where-is.
+
+    Args:
+        type_: The exception type.
+        value: The exception value.
+        traceback: The traceback object.
+
+    Returns:
+        Nothing.
+    """
     levels.error(f"[bold]Exception[/] occurred, please wait for it to be processed...")
     traceback_console: Console = Console(file=sys.stderr)
 
@@ -56,5 +67,15 @@ sys.excepthook = excepthook
 
 
 def input(*prompt: Union[str, Text], markup: bool = True, emoji: bool = True) -> str:
+    """An input function that supports rich syntax.
+
+    Args:
+        *prompt: The text you want to print out to the user.
+        markup: Enable markup?
+        emoji: Enable emojis?
+
+    Returns:
+        The text given out by the user.
+    """
     console: Console = Console()
     return console.input(*prompt, markup=markup, emoji=emoji)

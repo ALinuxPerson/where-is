@@ -1,3 +1,4 @@
+"""The cli frontend for where-is."""
 import typer
 from pathlib import Path
 from whereis import utils, levels, Database, Entry, input, version, exceptions
@@ -23,6 +24,19 @@ def _log(message: str) -> None:
 def _get_entry(
     entry_name: str, database: Database, no_err: bool = False
 ) -> Optional[Entry]:
+    """Gets an entry safely.
+
+    This function prevents exceptions from being printed out from core and instead replaces them with not so verbose,
+    user friendly messages.
+
+    Args:
+        entry_name: The entry name.
+        database: The database.
+        no_err: Should no errors be displayed?
+
+    Returns:
+        An entry if no error was encountered, else nothing.
+    """
     for entry_ in database.entries:
         _log(f"Checking if [bold]'{entry_.name}'[/] == [bold]'{entry_name}'[/]...")
         try:
@@ -43,6 +57,20 @@ def _get_entry(
 
 
 def _eval_db_opts(info: bool, add: bool, remove: bool, delete: bool) -> bool:
+    """Evaluates the options given by the user in the `where-is database [OPTIONS]` argument.
+
+    The `where-is database [OPTIONS]` arguments are all mutually exclusive, which means this needs to be implemented to
+    enforce that mutually-exclusiveness.
+
+    Args:
+        info: The info option.
+        add: The add option.
+        remove: The remove option.
+        delete: The delete option.
+
+    Returns:
+        True if the options are mutually exclusive, else False.
+    """
     _log(
         f"Got options:\n"
         f"info: {info}, add: {add}, remove: {remove}, delete: {delete}"
@@ -57,6 +85,17 @@ def _eval_db_opts(info: bool, add: bool, remove: bool, delete: bool) -> bool:
 
 
 def _get_database(location: Path) -> Optional[Database]:
+    """Gets a database object safely.
+
+    This function prevents exceptions from being printed out from core and instead replaces them with not so verbose,
+    user friendly messages. If the database doesn't exist, this function creates it automatically.
+
+    Args:
+        location: The location where the database is.
+
+    Returns:
+        A database object if no error was encountered, else nothing.
+    """
     database: Database = Database(location)
     if not database.exists():
         try:
@@ -78,6 +117,16 @@ def _get_database(location: Path) -> Optional[Database]:
 
 
 def _add_entry(database: Database) -> bool:
+    """Adds an entry safely.
+
+    This function helps the user to add an entry to a database.
+
+    Args:
+        database: The database object.
+
+    Returns:
+        True if no error was encountered, else False.
+    """
     levels.info("Enter the name of the entry.")
     entry_name: str = input("[blue]Entry name: ")
     if entry_name in [entry.name for entry in database.entries]:
@@ -98,6 +147,17 @@ def _add_entry(database: Database) -> bool:
 
 
 def _rm_entry(database: Database) -> None:
+    """Removes an entry safely.
+
+    This function prevents exceptions from being printed out from core and instead replaces them with not so verbose,
+    user friendly messages.
+
+    Args:
+        database: The database object.
+
+    Returns:
+        Nothing.
+    """
     levels.info("Enter the name of the entry: ")
     entry: Optional[Entry] = _get_entry(input("[blue]Entry name: "), database)
     if not entry:
@@ -107,6 +167,17 @@ def _rm_entry(database: Database) -> None:
 
 
 def _del_db(database: Database) -> None:
+    """Deletes a database safely.
+
+    This function prevents exceptions from being printed out from core and instead replaces them with not so verbose,
+    user friendly messages.
+
+    Args:
+        database: The database object.
+
+    Returns:
+        Nothing.
+    """
     try:
         database.delete()
         levels.success("Successfully deleted database.")
@@ -115,6 +186,14 @@ def _del_db(database: Database) -> None:
 
 
 def _show_version(value: bool) -> None:
+    """Shows the formatted version.
+
+    Args:
+        value: Required otherwise _show_version always gets executed.
+
+    Returns:
+        Nothing.
+    """
     if value:
         console: Console = Console()
         console.print(VERSION_STRING, style="blue")
@@ -132,6 +211,15 @@ def root(
         callback=_show_version,
     ),
 ) -> None:
+    """The root arguments.
+
+    Args:
+        verbose: Enable verbose output.
+        version_: Show version.
+
+    Returns:
+        Nothing.
+    """
     global is_verbose
 
     if verbose:
@@ -167,7 +255,7 @@ def cli_database(
     ),
     delete: bool = typer.Option(False, "--delete", help="Deletes the database."),
 ) -> None:
-    """Query, add and remove entries from the database."""
+    """Query, add and remove entries from the database and perform operations on the database itself."""
     database: Optional[Database] = _get_database(location) if not delete else Database(
         location
     )
@@ -193,4 +281,9 @@ def cli_database(
 
 
 def main() -> None:
+    """The main entry point.
+
+    Returns:
+        Nothing.
+    """
     return app()

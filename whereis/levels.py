@@ -13,6 +13,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""Custom messages."""
 from typing import Literal, Dict
 from rich.console import Console
 import sys
