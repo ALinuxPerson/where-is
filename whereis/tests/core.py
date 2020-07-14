@@ -19,3 +19,11 @@ def test_entry_attributes() -> None:
     ]
     assert entry.to_dict == entry_map
     assert entry.to_json == json_string
+
+
+def test_entry_equality() -> None:
+    entry: Entry = Entry("Test", ["{HOME}", "johndoe"], ["etc"])
+    other_equal_entry: Entry = Entry("Test", ["{HOME}", "johndoe"], ["etc"])
+    other_inequal_entry: Entry = Entry("NotEqual", ["etc", "lib"])
+    assert entry == other_equal_entry
+    assert entry != other_inequal_entry
