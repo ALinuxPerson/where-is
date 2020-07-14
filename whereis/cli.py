@@ -42,18 +42,18 @@ def _get_entry(
         return None
 
 
-def _eval_db_opts(info: bool, add: bool, remove: bool) -> bool:
-    _log(f"Got options:\n" f"info: {info}, add: {add}, remove: {remove}")
-    if info and add or info and remove:
+def _eval_db_opts(info: bool, add: bool, remove: bool, delete: bool) -> bool:
+    _log(
+        f"Got options:\n"
+        f"info: {info}, add: {add}, remove: {remove}, delete: {delete}"
+    )
+    opts: List[bool] = [info, add, remove, delete]
+    if opts.count(True) > 1:
         levels.error(
-            f"The info option is mutually exclusive with the add and remove options."
+            f"The info, add, remove and delete options are mutually exclusive with each other."
         )
         return False
-    elif add and remove:
-        levels.error("The add and remove options are mutually exclusive.")
-        return False
-    else:
-        return True
+    return True
 
 
 def _get_database(location: Path) -> Optional[Database]:
@@ -150,19 +150,18 @@ def find(
 @app.command("database")
 def cli_database(
     location: Path = typer.Option(
-        utils.config_folder(), help="The location of the database."
+        utils.config_folder(), help="The location of a database."
     ),
-    info: bool = typer.Option(
-        False, "--info", help="Show information about the entry."
-    ),
-    add: bool = typer.Option(False, "--add", help="Add the entry to the database."),
+    info: bool = typer.Option(False, "--info", help="Show information about an entry."),
+    add: bool = typer.Option(False, "--add", help="Add an entry to a database."),
     remove: bool = typer.Option(
-        False, "--remove", help="Remove the entry from the database."
+        False, "--remove", help="Remove an entry from a database."
     ),
+    delete: bool = typer.Option(False, "--delete", help="Deletes the database."),
 ) -> None:
     """Query, add and remove entries from the database."""
     database: Optional[Database] = _get_database(location)
-    if not _eval_db_opts(info, add, remove) or not database:
+    if not _eval_db_opts(info, add, remove, delete) or not database:
         return
     if info:
         try:
