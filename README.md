@@ -44,5 +44,9 @@ For more information and graphics, [see the wiki.](https://github.com/what-to-co
 - [Black](https://github.com/psf/black): Used as the formatter
 - [Pipenv](https://github.com/pypa/pipenv): Used as the virtualenv manager
 
+# Acknowledgements
+- [joereynolds/what-to-code](https://github.com/joereynolds/what-to-code): For inspiration to make this project
+- [Logomakr](https://logomakr.com/): Used to make the logo
+
 # License
 This project is licensed under the GNU GPLv3 License - see this [LICENSE.md](https://raw.githubusercontent.com/what-to-code-complete/where-is/master/LICENSE) file for details
