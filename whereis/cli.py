@@ -10,6 +10,7 @@ app: typer.Typer = typer.Typer(
     help="An elegant way to find configuration files (and folders)."
 )
 is_verbose: bool = False
+database_location: Path = utils.config_folder()
 VERSION_STRING: str = f"""[bold dark_blue]  ---       [/][italic]where-is[/] {version} Copyright (C) 2020
 [bold dark_blue] /          [/]Made by [italic bold]ALinuxPerson[/]. This project uses the [italic bold]GNU GPLv3[/] license.
 [bold dark_blue]<  ?
@@ -210,29 +211,32 @@ def root(
         help="Show this program's version number and credits",
         callback=_show_version,
     ),
+    database_location_: Path = typer.Option(
+        None, "--database-location", help="Specify the database location."
+    ),
 ) -> None:
     """The root arguments.
 
     Args:
         verbose: Enable verbose output.
         version_: Show version.
+        database_location_: Specify the database location.
 
     Returns:
         Nothing.
     """
     global is_verbose
+    global database_location
 
     if verbose:
         is_verbose = True
 
+    if database_location_:
+        database_location = database_location_
+
 
 @app.command()
-def find(
-    name: str = typer.Argument(..., help="The name of the entry."),
-    database_location: Path = typer.Option(
-        utils.config_folder(), help="The location of the database."
-    ),
-) -> None:
+def find(name: str = typer.Argument(..., help="The name of the entry.")) -> None:
     """Find an entry with the name NAME"""
     database: Optional[Database] = _get_database(database_location)
     if not database:
@@ -245,9 +249,6 @@ def find(
 
 @app.command("database")
 def cli_database(
-    location: Path = typer.Option(
-        utils.config_folder(), help="The location of a database."
-    ),
     info: bool = typer.Option(False, "--info", help="Show information about an entry."),
     add: bool = typer.Option(False, "--add", help="Add an entry to a database."),
     remove: bool = typer.Option(
@@ -256,9 +257,9 @@ def cli_database(
     delete: bool = typer.Option(False, "--delete", help="Deletes the database."),
 ) -> None:
     """Query, add and remove entries from the database and perform operations on the database itself."""
-    database: Optional[Database] = _get_database(location) if not delete else Database(
-        location
-    )
+    database: Optional[Database] = _get_database(
+        database_location
+    ) if not delete else Database(database_location)
     if not _eval_db_opts(info, add, remove, delete) or not database:
         return
     if info:
