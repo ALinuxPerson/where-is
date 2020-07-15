@@ -35,7 +35,7 @@ $ where-is database --add
 $ where-is database --remove
 ```
 
-## More information
+# More information
 For more information and graphics, [see the wiki.](https://github.com/what-to-code-complete/where-is/wiki)
 
 # Built with
