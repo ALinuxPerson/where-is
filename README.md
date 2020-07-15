@@ -69,7 +69,7 @@ Write the following information to:
 
 # Built with
 - [Rich](https://github.com/willmcgugan/rich): For rich text and beautiful formatting
-- [Fire](https://github.com/google/python-fire): Used for generating CLIs
+- [Typer](https://github.com/tiangolo/typer): Used as the argument parser
 - [Black](https://github.com/psf/black): Used as the formatter
 - [Pipenv](https://github.com/pypa/pipenv): Used as the virtualenv manager
 
