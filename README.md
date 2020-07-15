@@ -21,50 +21,22 @@
 $ pip install where-is
 ```
 
-## Usage
-Get the config of `grub`.
-
+## Basic Usage
+### Get config locations of `grub`
 ```bash
-$ where-is grub
+$ where-is find grub
+```
+### Add an entry
+```bash
+$ where-is database --add
+```
+### Remove an entry
+```bash
+$ where-is database --remove
 ```
 
-## Configuration
-Where:
-
-`$NAME` is the name of the entry
-
-`$LOCATIONS ...` is the locations
-
-`$DATABASE_FOLDER` is the database folder (default is the where-is config folder)
-
-```json
-{
-  "name": "$NAME",
-  "locations": [
-    ["$LOCATIONS", "..."]  
-  ] 
-}
-```
-
-Example:
-```json
-{
-  "name": "bash",
-  "locations": [
-      ["{HOME}", ".bashrc"],
-      ["{HOME}", ".bash_logout"],
-      ["{HOME}", ".bash_profile"],
-      ["{HOME}", ".bash_history"]
-  ]
-}
-```
-
-Write the following information to:
-- Linux: `~/.config/where-is/$NAME.json`
-- Mac: `~/Library/Preferences/where-is/$NAME.json`
-- Windows: `%APPDATA%\where-is\$NAME.json`
-
-... or `$DATABASE_FOLDER`
+## More information
+For more information and graphics, [see the wiki.](https://github.com/what-to-code-complete/where-is/wiki)
 
 # Built with
 - [Rich](https://github.com/willmcgugan/rich): For rich text and beautiful formatting
